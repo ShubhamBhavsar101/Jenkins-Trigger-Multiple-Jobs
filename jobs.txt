@@ -1,0 +1,10 @@
+Team-01/ci-cd-pipeline
+Team-02/ci-cd-pipeline
+Team-03/ci-cd-pipeline
+Team-04/ci-cd-pipeline
+Team-05/ci-cd-pipeline
+Team-06/ci-cd-pipeline
+Team-07/ci-cd-pipeline
+Team-08/ci-cd-pipeline
+Team-09/ci-cd-pipeline
+Team-10/ci-cd-pipeline
