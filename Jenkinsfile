@@ -9,7 +9,6 @@ pipeline {
   stages {
     stage('Checkout Repo') {
       steps {
-        // Pull the repo that contains jobs.txt
         checkout scm
       }
     }
@@ -28,7 +27,7 @@ pipeline {
             error "❌ No jobs found. Add a jobs.txt file in your GitHub repo or define JOB_LIST."
           }
           env.TARGETS = jobs.join(',')
-          echo "Job targets: ${env.TARGETS}"
+          echo "🎯 Job targets: ${env.TARGETS}"
         }
       }
     }
@@ -50,7 +49,7 @@ pipeline {
                 def r = b?.result ?: 'UNKNOWN'
                 def d = b?.duration ?: 0
                 summary << [name: jobName, result: r, duration: d]
-                echo "${jobName} finished with status ${r}"
+                echo "✅ ${jobName} finished with status ${r}"
               } catch (err) {
                 echo "❌ Error triggering ${jobName}: ${err}"
                 summary << [name: jobName, result: "ERROR", duration: 0]
@@ -77,6 +76,16 @@ pipeline {
           }
           html += "</table></body></html>"
           writeFile file: 'pipeline_report.html', text: html
+
+          // === Print summary directly in console ===
+          echo "\n==================== 🧾 PIPELINE SUMMARY ====================\n"
+          echo String.format("%-35s %-12s %-10s", "Pipeline Name", "Result", "Duration(ms)")
+          echo "-------------------------------------------------------------"
+          summary.each { s ->
+            def res = s.result.padRight(10)
+            echo String.format("%-35s %-12s %-10s", s.name, s.result, s.duration)
+          }
+          echo "=============================================================\n"
 
           archiveArtifacts artifacts: 'pipeline_report.html,pipeline_results.csv'
         }

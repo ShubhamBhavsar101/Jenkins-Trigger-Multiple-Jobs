@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+    environment {
+        JOB_LIST = "Team-01/ci-cd-pipeline"
+    }
+
+    stages {
+        stage('Checkout Repo') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Load Job List') {
+            steps {
+                script {
+                    def jobs = []
+                    if (fileExists('jobs.txt')) {
+                        jobs = readFile('jobs.txt').split('\n').collect {it.trim()}.findAll{it}
+                        echo "Loaded ${jobs.size()} jobs from jobs.txt"
+                    } else {
+                        error " No jobs found."
+                    }
+                    env.TARGETS = jobs.join(',')
+                    echo "Job targets: ${env.TARGETS}"
+                }
+            }
+        }
+
+        stage('Trigger Pipelines (Parallel)') {
+            steps {
+                script {
+                    def jobs = env.TARGETS.split(',').collect {it.trim()}.findAll{it}
+                    echo "Will trigger ${jobs.size()} pipelines in parallel."
+                    def branches = [:]
+                    def summary = Collections.synchronizedList([])
+
+                    jobs.each {jobName -> 
+                        branches[jobName] = {
+                            try {
+                                echo "Triggering ${jobName}"
+                                def b = build job: jobName, wait: true, propagate:false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
